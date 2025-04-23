@@ -131,9 +131,11 @@ void set_Kd(PID* controller, double Kd);
 *
 * @param[in] controller Pointer to a PID controller struct.
 *
+* @param[in] reference Output reference value.
+*
 * @param[in] measurement Latest output measurement.
 *
 **********************************************************/
-double compute_control_action(PID* controller, double measurement);
+double compute_control_action(PID* controller, double reference, double measurement);
 
 #endif
