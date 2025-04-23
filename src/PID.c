@@ -64,6 +64,7 @@ void PID_init(PID* controller, double Kp, double Ki, double Kd, double tau, doub
 
 };
 
+// Getters.
 double get_Kp(PID* controller){
 
     return controller->Kp;
@@ -82,9 +83,11 @@ double get_Kd(PID* controller){
 
 };
 
+// Setters. Tt is also updated.
 void set_Kp(PID* controller, double Kp){
 
     controller->Kp = Kp;
+    _update_Tt(controller);
 
     return;
 
@@ -93,6 +96,7 @@ void set_Kp(PID* controller, double Kp){
 void set_Ki(PID* controller, double Ki){
 
     controller->Ki = Ki;
+    _update_Tt(controller);
 
     return;
 
@@ -101,6 +105,7 @@ void set_Ki(PID* controller, double Ki){
 void set_Kd(PID* controller, double Kd){
 
     controller->Kd = Kd;
+    _update_Tt(controller);
 
     return;
 
@@ -137,3 +142,10 @@ double compute_control_action(PID* controller, double reference, double measurem
     return output;
 
 };
+
+// Utility function used by the setters.
+void _update_Tt(PID* controller){
+
+    controller->Tt = (controller->Ki == 0.0 || controller->Kp == 0.0) ? 0.0 : sqrt((controller->Kp / controller->Ki) * (controller->Kd / controller->Kp));
+
+}
