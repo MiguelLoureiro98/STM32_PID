@@ -148,4 +148,4 @@ void _update_Tt(PID* controller){
 
     controller->Tt = (controller->Ki == 0.0 || controller->Kp == 0.0) ? 0.0 : sqrt((controller->Kp / controller->Ki) * (controller->Kd / controller->Kp));
 
-}
+};

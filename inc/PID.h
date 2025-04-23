@@ -135,6 +135,8 @@ void set_Kd(PID* controller, double Kd);
 *
 * @param[in] measurement Latest output measurement.
 *
+* @return New control action.
+*
 **********************************************************/
 double compute_control_action(PID* controller, double reference, double measurement);
 
