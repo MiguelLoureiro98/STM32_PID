@@ -19,9 +19,8 @@
 #include "PID.h"
 #include <math.h>
 
-/*
-* PID controller structure.
-*/
+//PID controller structure.
+
 struct _PID{
 
     double Kp;
@@ -36,15 +35,17 @@ struct _PID{
     double past_D;
     double past_y;
     double past_e;
+    double uv;
+    double past_uv;
 
 };
 
-/*
-* Initialise controller parameters and internal variables.
-*/
+// Initialise controller parameters and internal variables.
+
 void PID_init(PID* controller, double Kp, double Ki, double Kd, double tau, double umin, double umax, double Ts){
 
     // Parameters.
+
     controller->Kp = Kp;
     controller->Ki = Ki;
     controller->Kd = Kd;
@@ -55,16 +56,20 @@ void PID_init(PID* controller, double Kp, double Ki, double Kd, double tau, doub
     controller->Tt = (Ki == 0.0 || Kp == 0.0) ? 0.0 : sqrt((Kp / Ki) * (Kd / Kp));
 
     // Internal variables.
+
     controller->past_I = 0.0;
     controller->past_D = 0.0;
     controller->past_y = 0.0;
     controller->past_e = 0.0;
+    controller->uv = 0.0;
+    controller->past_uv = 0.0;
 
     return;
 
 };
 
 // Getters.
+
 double get_Kp(PID* controller){
 
     return controller->Kp;
@@ -84,6 +89,7 @@ double get_Kd(PID* controller){
 };
 
 // Setters. Tt is also updated.
+
 void set_Kp(PID* controller, double Kp){
 
     controller->Kp = Kp;
@@ -111,26 +117,31 @@ void set_Kd(PID* controller, double Kd){
 
 };
 
+// Compute control action.
+
 double compute_control_action(PID* controller, double reference, double measurement){
 
     double error = reference - measurement;
     double P;
     double I;
     double D;
+    double u;
     double output;
 
     P = controller->Kp * error;
-    I = controller->past_I + 0.5 * controller->Ki * controller->Ts * (error + controller->past_e);
+    I = controller->past_I + 0.5 * controller->Ki * controller->Ts * (error + controller->past_e) + 
+        0.5 * controller->Ts / controller->Tt * (controller->uv + controller->past_uv);
     D = (2.0 * controller->tau - controller->Ts) / (2.0 * controller->tau + controller->Ts) * controller->past_D - 
-        (2.0 * controller->Kd) / (2 * controller->tau + controller->Ts) * (measurement - controller->past_y);
+        (2.0 * controller->Kd) / (2.0 * controller->tau + controller->Ts) * (measurement - controller->past_y);
 
-    output = P + I + D;
+    u = P + I + D;
+    output = u;
 
     if(output > controller->umax)
 
         output = controller->umax;
 
-    else if(output < controller-> umin)
+    else if(output < controller->umin)
 
         output = controller->umin;
 
@@ -138,12 +149,15 @@ double compute_control_action(PID* controller, double reference, double measurem
     controller->past_D = D;
     controller->past_e = error;
     controller->past_y = measurement;
+    controller->past_uv = controller->uv;
+    controller->uv = output - u;
     
     return output;
 
 };
 
 // Utility function used by the setters.
+
 void _update_Tt(PID* controller){
 
     controller->Tt = (controller->Ki == 0.0 || controller->Kp == 0.0) ? 0.0 : sqrt((controller->Kp / controller->Ki) * (controller->Kd / controller->Kp));
