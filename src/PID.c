@@ -126,11 +126,6 @@ double compute_control_action(PID* controller, double reference, double measurem
     double error = reference - measurement;
     double output;
 
-    controller->I = controller->I + 0.5 * controller->Ki * controller->Ts * (error + controller->past_e) + 
-        0.5 * controller->Ts / controller->Tt * (controller->uv + controller->past_uv);
-    controller->D = (2.0 * controller->tau - controller->Ts) / (2.0 * controller->tau + controller->Ts) * controller->D - 
-        (2.0 * controller->Kd) / (2.0 * controller->tau + controller->Ts) * (measurement - controller->past_y);
-
     controller->u = controller->Kp * error + controller->I + controller->D;
     output = controller->u;
 
@@ -142,10 +137,14 @@ double compute_control_action(PID* controller, double reference, double measurem
 
         output = controller->umin;
 
-    controller->past_e = error;
-    controller->past_y = measurement;
     controller->past_uv = controller->uv;
     controller->uv = output - controller->u;
+    controller->I = controller->I + 0.5 * controller->Ki * controller->Ts * (error + controller->past_e) + 
+        0.5 * controller->Ts / controller->Tt * (controller->uv + controller->past_uv);
+    controller->D = (2.0 * controller->tau - controller->Ts) / (2.0 * controller->tau + controller->Ts) * controller->D - 
+        (2.0 * controller->Kd) / (2.0 * controller->tau + controller->Ts) * (measurement - controller->past_y);
+    controller->past_e = error;
+    controller->past_y = measurement;
     
     return output;
 

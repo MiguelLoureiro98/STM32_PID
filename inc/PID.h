@@ -153,7 +153,6 @@ double compute_control_action(PID* controller, double reference, double measurem
 *   latest output measurement. The controller state is
 *   NOT updated. 
 *
-*
 * @param[in] controller Pointer to a PID controller struct.
 *
 * @param[in] reference Output reference value.
