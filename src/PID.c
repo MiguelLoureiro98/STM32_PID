@@ -150,7 +150,43 @@ double compute_control_action(PID* controller, double reference, double measurem
 
 };
 
-// Utility function used by the setters.
+// Compute control action without updating the state.
+
+double compute_no_update(PID* controller, double reference, double measurement){
+
+    double error = reference - measurement;
+    double u = controller->Kp * error + controller->I + controller->D;
+
+    if(u > controller->umax)
+
+        u = controller->umax;
+
+    else if(u < controller->umin)
+
+        u = controller->umin;
+
+    return u;
+
+};
+
+// Update controller state.
+
+void update_controller_state(PID* controller, double reference, double measurement, double control_action){
+
+    double error = reference - measurement;
+
+    controller->past_uv = controller->uv;
+    controller->uv = controller->Kp * error + controller->I + controller->D - control_action;
+    controller->I = controller->I + 0.5 * controller->Ki * controller->Ts * (error + controller->past_e) + 
+        0.5 * controller->Ts / controller->Tt * (controller->uv + controller->past_uv);
+    controller->D = (2.0 * controller->tau - controller->Ts) / (2.0 * controller->tau + controller->Ts) * controller->D - 
+        (2.0 * controller->Kd) / (2.0 * controller->tau + controller->Ts) * (measurement - controller->past_y);
+    controller->past_e = error;
+    controller->past_y = measurement;
+
+};
+
+// Utility function used by the setters. Updates anti-windup parameter whenever the gains are changed.
 
 void _update_Tt(PID* controller){
 

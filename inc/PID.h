@@ -127,7 +127,10 @@ void set_Kd(PID* controller, double Kd);
 * @brief Compute the next control action.
 *
 * @details Compute the next control action based on the 
-*   latest output measurement.
+*   latest output measurement. The controller state is
+*   automatically updated. Note that this is
+*   computationally more costly than computing the control
+*   action and updating the state separately.
 *
 * @param[in] controller Pointer to a PID controller struct.
 *
@@ -139,5 +142,45 @@ void set_Kd(PID* controller, double Kd);
 *
 **********************************************************/
 double compute_control_action(PID* controller, double reference, double measurement);
+
+/**********************************************************
+*
+* @brief Compute the next control action.
+*
+* @details Compute the next control action based on the 
+*   latest output measurement. The controller state is
+*   NOT updated.
+*
+* @warning If this function is used to compute the control
+*   action, the update_controller_state function must be
+*   used ... .
+*
+* @param[in] controller Pointer to a PID controller struct.
+*
+* @param[in] reference Output reference value.
+*
+* @param[in] measurement Latest output measurement.
+*
+* @return New control action.
+*
+**********************************************************/
+double compute_no_update(PID* controller, double reference, double measurement);
+
+/**********************************************************
+*
+* @brief Update the controller state.
+*
+* @details Update the controller's integral and derivative
+*   terms, as well as past error values, measurements, and
+*   control actions.
+*
+* @param[out] controller Pointer to a PID controller struct.
+*
+* @param[in] reference Output reference value.
+*
+* @param[in] measurement Latest output measurement.
+*
+**********************************************************/
+void update_controller_state(PID* controller, double reference, double measurement);
 
 #endif
