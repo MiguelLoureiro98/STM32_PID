@@ -31,8 +31,8 @@ struct _PID{
     double umin;
     double umax;
     double Tt;
-    double past_I;
-    double past_D;
+    double I;
+    double D;
     double past_y;
     double past_e;
     double uv;
@@ -57,8 +57,8 @@ void PID_init(PID* controller, double Kp, double Ki, double Kd, double tau, doub
 
     // Internal variables.
 
-    controller->past_I = 0.0;
-    controller->past_D = 0.0;
+    controller->I = 0.0;
+    controller->D = 0.0;
     controller->past_y = 0.0;
     controller->past_e = 0.0;
     controller->uv = 0.0;
@@ -122,19 +122,15 @@ void set_Kd(PID* controller, double Kd){
 double compute_control_action(PID* controller, double reference, double measurement){
 
     double error = reference - measurement;
-    double P;
-    double I;
-    double D;
     double u;
     double output;
 
-    P = controller->Kp * error;
-    I = controller->past_I + 0.5 * controller->Ki * controller->Ts * (error + controller->past_e) + 
+    controller->I = controller->I + 0.5 * controller->Ki * controller->Ts * (error + controller->past_e) + 
         0.5 * controller->Ts / controller->Tt * (controller->uv + controller->past_uv);
-    D = (2.0 * controller->tau - controller->Ts) / (2.0 * controller->tau + controller->Ts) * controller->past_D - 
+    controller->D = (2.0 * controller->tau - controller->Ts) / (2.0 * controller->tau + controller->Ts) * controller->D - 
         (2.0 * controller->Kd) / (2.0 * controller->tau + controller->Ts) * (measurement - controller->past_y);
 
-    u = P + I + D;
+    u = controller->Kp * error + controller->I + controller->D;
     output = u;
 
     if(output > controller->umax)
@@ -145,8 +141,6 @@ double compute_control_action(PID* controller, double reference, double measurem
 
         output = controller->umin;
 
-    controller->past_I = I;
-    controller->past_D = D;
     controller->past_e = error;
     controller->past_y = measurement;
     controller->past_uv = controller->uv;
