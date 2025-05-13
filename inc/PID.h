@@ -140,6 +140,8 @@ void set_Kd(PID* controller, double Kd);
 *
 * @return New control action.
 *
+* @see compute_no_update
+*
 **********************************************************/
 double compute_control_action(PID* controller, double reference, double measurement);
 
@@ -149,11 +151,8 @@ double compute_control_action(PID* controller, double reference, double measurem
 *
 * @details Compute the next control action based on the 
 *   latest output measurement. The controller state is
-*   NOT updated.
+*   NOT updated. 
 *
-* @warning If this function is used to compute the control
-*   action, the update_controller_state function must be
-*   used ... .
 *
 * @param[in] controller Pointer to a PID controller struct.
 *
@@ -162,6 +161,18 @@ double compute_control_action(PID* controller, double reference, double measurem
 * @param[in] measurement Latest output measurement.
 *
 * @return New control action.
+*
+* @warning If this function is used to compute the control
+*   action, the update_controller_state function must be
+*   used to update the controller state before computing
+*   a new control action.
+*
+* @see update_controller_state, compute_control_action
+*
+* @note This function is computationally lighter
+*   than compute_control_action. Using this function will
+*   minimise the computations taking place between reading
+*   a sensor's value and setting an output pin.
 *
 **********************************************************/
 double compute_no_update(PID* controller, double reference, double measurement);
@@ -180,7 +191,12 @@ double compute_no_update(PID* controller, double reference, double measurement);
 *
 * @param[in] measurement Latest output measurement.
 *
+* @param[in] control_action Previously computed control 
+*   action.
+*
+* @see compute_no_update
+*
 **********************************************************/
-void update_controller_state(PID* controller, double reference, double measurement);
+void update_controller_state(PID* controller, double reference, double measurement, double control_action);
 
 #endif
