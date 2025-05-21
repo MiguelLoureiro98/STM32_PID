@@ -21,7 +21,7 @@
 
 //PID controller structure.
 
-struct _PID{
+/*struct _PID{
 
     double Kp;
     double Ki;
@@ -39,11 +39,11 @@ struct _PID{
     double uv;
     double past_uv;
 
-};
+};*/
 
 // Initialise controller parameters and internal variables.
 
-void PID_init(PID* controller, double Kp, double Ki, double Kd, double tau, double umin, double umax, double Ts){
+void PID_init(PID controller, double Kp, double Ki, double Kd, double tau, double umin, double umax, double Ts){
 
     // Parameters.
 
@@ -56,6 +56,7 @@ void PID_init(PID* controller, double Kp, double Ki, double Kd, double tau, doub
     controller->umin = umin;
     controller->umax = umax;
     controller->Tt = (Ki == 0.0 || Kp == 0.0) ? 0.0 : sqrt((Kp / Ki) * (Kd / Kp));
+    //controller->Tt = 1.0;
 
     // Internal variables.
 
@@ -70,21 +71,32 @@ void PID_init(PID* controller, double Kp, double Ki, double Kd, double tau, doub
 
 };
 
+// Utility function used by the setters. Updates anti-windup parameter whenever the gains are changed.
+
+void _update_Tt(PID controller){
+
+    controller->Tt = (controller->Ki == 0.0 || controller->Kp == 0.0) ? 0.0 : sqrt((controller->Kp / controller->Ki) * (controller->Kd / controller->Kp));
+    //controller->Tt = 1.0;
+
+    return;
+
+};
+
 // Getters.
 
-double get_Kp(PID* controller){
+double get_Kp(PID controller){
 
     return controller->Kp;
 
 };
 
-double get_Ki(PID* controller){
+double get_Ki(PID controller){
 
     return controller->Ki;
 
 };
 
-double get_Kd(PID* controller){
+double get_Kd(PID controller){
 
     return controller->Kd;
 
@@ -92,7 +104,7 @@ double get_Kd(PID* controller){
 
 // Setters. Tt is also updated.
 
-void set_Kp(PID* controller, double Kp){
+void set_Kp(PID controller, double Kp){
 
     controller->Kp = Kp;
     _update_Tt(controller);
@@ -101,7 +113,7 @@ void set_Kp(PID* controller, double Kp){
 
 };
 
-void set_Ki(PID* controller, double Ki){
+void set_Ki(PID controller, double Ki){
 
     controller->Ki = Ki;
     _update_Tt(controller);
@@ -110,7 +122,7 @@ void set_Ki(PID* controller, double Ki){
 
 };
 
-void set_Kd(PID* controller, double Kd){
+void set_Kd(PID controller, double Kd){
 
     controller->Kd = Kd;
     _update_Tt(controller);
@@ -121,7 +133,7 @@ void set_Kd(PID* controller, double Kd){
 
 // Compute control action.
 
-double compute_control_action(PID* controller, double reference, double measurement){
+double compute_control_action(PID controller, double reference, double measurement){
 
     double error = reference - measurement;
     double output;
@@ -152,7 +164,7 @@ double compute_control_action(PID* controller, double reference, double measurem
 
 // Compute control action without updating the state.
 
-double compute_no_update(PID* controller, double reference, double measurement){
+double compute_no_update(PID controller, double reference, double measurement){
 
     double error = reference - measurement;
     double output;
@@ -174,7 +186,7 @@ double compute_no_update(PID* controller, double reference, double measurement){
 
 // Update controller state.
 
-void update_controller_state(PID* controller, double reference, double measurement, double control_action){
+void update_controller_state(PID controller, double reference, double measurement, double control_action){
 
     double error = reference - measurement;
 
@@ -186,16 +198,6 @@ void update_controller_state(PID* controller, double reference, double measureme
         (2.0 * controller->Kd) / (2.0 * controller->tau + controller->Ts) * (measurement - controller->past_y);
     controller->past_e = error;
     controller->past_y = measurement;
-
-    return;
-
-};
-
-// Utility function used by the setters. Updates anti-windup parameter whenever the gains are changed.
-
-void _update_Tt(PID* controller){
-
-    controller->Tt = (controller->Ki == 0.0 || controller->Kp == 0.0) ? 0.0 : sqrt((controller->Kp / controller->Ki) * (controller->Kd / controller->Kp));
 
     return;
 

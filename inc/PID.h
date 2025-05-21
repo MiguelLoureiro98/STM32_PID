@@ -31,6 +31,26 @@
 #ifndef __PID_H__
 #define __PID_H__
 
+struct _PID{
+
+    double Kp;
+    double Ki;
+    double Kd;
+    double tau;
+    double Ts;
+    double u;
+    double umin;
+    double umax;
+    double Tt;
+    double I;
+    double D;
+    double past_y;
+    double past_e;
+    double uv;
+    double past_uv;
+
+};
+
 /***********************************************
 * 
 * @typedef PID controller structure declaration.
@@ -38,7 +58,7 @@
 * @brief PID controller structure declaration.
 *
 ***********************************************/
-typedef struct _PID PID;
+typedef struct _PID* PID;
 
 /******************************
 * 
@@ -54,7 +74,7 @@ typedef struct _PID PID;
 * @param[in] Ts Controller sampling time.
 *
 ******************************/
-void PID_init(PID* controller, double Kp, double Ki, double Kd, double tau, double umin, double umax, double Ts);
+void PID_init(PID controller, double Kp, double Ki, double Kd, double tau, double umin, double umax, double Ts);
 
 /**********************************************************
 *
@@ -65,7 +85,7 @@ void PID_init(PID* controller, double Kp, double Ki, double Kd, double tau, doub
 * @return Proportional gain.
 *
 **********************************************************/
-double get_Kp(PID* controller);
+double get_Kp(PID controller);
 
 /**********************************************************
 *
@@ -76,7 +96,7 @@ double get_Kp(PID* controller);
 * @return Integral gain.
 *
 **********************************************************/
-double get_Ki(PID* controller);
+double get_Ki(PID controller);
 
 /**********************************************************
 *
@@ -87,7 +107,7 @@ double get_Ki(PID* controller);
 * @return Derivative gain.
 *
 **********************************************************/
-double get_Kd(PID* controller);
+double get_Kd(PID controller);
 
 /**********************************************************
 *
@@ -98,7 +118,7 @@ double get_Kd(PID* controller);
 * @param[in] Kp New proportional gain.
 *
 **********************************************************/
-void set_Kp(PID* controller, double Kp);
+void set_Kp(PID controller, double Kp);
 
 /**********************************************************
 *
@@ -109,7 +129,7 @@ void set_Kp(PID* controller, double Kp);
 * @param[in] Kp New integral gain.
 *
 **********************************************************/
-void set_Ki(PID* controller, double Ki);
+void set_Ki(PID controller, double Ki);
 
 /**********************************************************
 *
@@ -120,7 +140,7 @@ void set_Ki(PID* controller, double Ki);
 * @param[in] Kp New derivative gain.
 *
 **********************************************************/
-void set_Kd(PID* controller, double Kd);
+void set_Kd(PID controller, double Kd);
 
 /**********************************************************
 *
@@ -143,7 +163,7 @@ void set_Kd(PID* controller, double Kd);
 * @see compute_no_update
 *
 **********************************************************/
-double compute_control_action(PID* controller, double reference, double measurement);
+double compute_control_action(PID controller, double reference, double measurement);
 
 /**********************************************************
 *
@@ -174,7 +194,7 @@ double compute_control_action(PID* controller, double reference, double measurem
 *   a sensor's value and setting an output pin.
 *
 **********************************************************/
-double compute_no_update(PID* controller, double reference, double measurement);
+double compute_no_update(PID controller, double reference, double measurement);
 
 /**********************************************************
 *
@@ -196,6 +216,6 @@ double compute_no_update(PID* controller, double reference, double measurement);
 * @see compute_no_update
 *
 **********************************************************/
-void update_controller_state(PID* controller, double reference, double measurement, double control_action);
+void update_controller_state(PID controller, double reference, double measurement, double control_action);
 
 #endif
