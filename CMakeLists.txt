@@ -8,7 +8,7 @@ if(MATH)
 
     add_library(PID STATIC src/PID.c)
     target_include_directories(PID PUBLIC inc/)
-    target_link_libraries(PID PUBLIC ${MATH})
+    target_link_libraries(PID PRIVATE ${MATH})
     message(STATUS "Math library found and linked sucessfully.")
 
 else()
