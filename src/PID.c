@@ -19,27 +19,15 @@
 #include "PID.h"
 #include <math.h>
 
-//PID controller structure.
+// Utility function used by the setters. Updates anti-windup parameter whenever the gains are changed.
 
-/*struct _PID{
+void _update_Tt(PID* controller){
 
-    double Kp;
-    double Ki;
-    double Kd;
-    double tau;
-    double Ts;
-    double u;
-    double umin;
-    double umax;
-    double Tt;
-    double I;
-    double D;
-    double past_y;
-    double past_e;
-    double uv;
-    double past_uv;
+    controller->Tt = (controller->Ki == 0.0 || controller->Kp == 0.0) ? 0.0 : sqrt((controller->Kp / controller->Ki) * (controller->Kd / controller->Kp));
 
-};*/
+    return;
+
+};
 
 // Initialise controller parameters and internal variables.
 
@@ -55,8 +43,7 @@ void PID_init(PID* controller, double Kp, double Ki, double Kd, double tau, doub
     controller->u = 0.0;
     controller->umin = umin;
     controller->umax = umax;
-    controller->Tt = (Ki == 0.0 || Kp == 0.0) ? 0.0 : sqrt((Kp / Ki) * (Kd / Kp));
-    //controller->Tt = 1.0;
+    _update_Tt(controller);
 
     // Internal variables.
 
@@ -66,17 +53,6 @@ void PID_init(PID* controller, double Kp, double Ki, double Kd, double tau, doub
     controller->past_e = 0.0;
     controller->uv = 0.0;
     controller->past_uv = 0.0;
-
-    return;
-
-};
-
-// Utility function used by the setters. Updates anti-windup parameter whenever the gains are changed.
-
-void _update_Tt(PID* controller){
-
-    controller->Tt = (controller->Ki == 0.0 || controller->Kp == 0.0) ? 0.0 : sqrt((controller->Kp / controller->Ki) * (controller->Kd / controller->Kp));
-    //controller->Tt = 1.0;
 
     return;
 
@@ -151,8 +127,8 @@ double compute_control_action(PID* controller, double reference, double measurem
 
     controller->past_uv = controller->uv;
     controller->uv = output - controller->u;
-    controller->I = controller->I + 0.5 * controller->Ki * controller->Ts * (error + controller->past_e) + 
-        0.5 * controller->Ts / controller->Tt * (controller->uv + controller->past_uv);
+    controller->I += 0.5 * controller->Ki * controller->Ts * (error + controller->past_e) + 
+        (double) (controller->Ki != 0.0) * 0.5 * controller->Ts / controller->Tt * (controller->uv + controller->past_uv);
     controller->D = (2.0 * controller->tau - controller->Ts) / (2.0 * controller->tau + controller->Ts) * controller->D - 
         (2.0 * controller->Kd) / (2.0 * controller->tau + controller->Ts) * (measurement - controller->past_y);
     controller->past_e = error;
@@ -192,8 +168,8 @@ void update_controller_state(PID* controller, double reference, double measureme
 
     controller->past_uv = controller->uv;
     controller->uv = control_action - controller->u;
-    controller->I = controller->I + 0.5 * controller->Ki * controller->Ts * (error + controller->past_e) + 
-        0.5 * controller->Ts / controller->Tt * (controller->uv + controller->past_uv);
+    controller->I += 0.5 * controller->Ki * controller->Ts * (error + controller->past_e) + 
+        (double) (controller->Ki != 0.0) * 0.5 * controller->Ts / controller->Tt * (controller->uv + controller->past_uv);
     controller->D = (2.0 * controller->tau - controller->Ts) / (2.0 * controller->tau + controller->Ts) * controller->D - 
         (2.0 * controller->Kd) / (2.0 * controller->tau + controller->Ts) * (measurement - controller->past_y);
     controller->past_e = error;
