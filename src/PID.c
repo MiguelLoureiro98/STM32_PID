@@ -23,7 +23,17 @@
 
 void _update_Tt(PID* controller){
 
-    controller->Tt = (controller->Ki == 0.0 || controller->Kp == 0.0) ? 0.0 : sqrt((controller->Kp / controller->Ki) * (controller->Kd / controller->Kp));
+    if(controller->Ki == 0.0){
+
+        controller->Tt = 1.0;
+
+    }
+
+    else{
+
+        controller->Tt = (controller->Kp == 0.0 || controller->Kd == 0.0) ? sqrt(1.0 / controller->Ki) : sqrt((controller->Kp / controller->Ki) * (controller->Kd / controller->Kp));
+
+    }
 
     return;
 
@@ -129,6 +139,12 @@ double compute_control_action(PID* controller, double reference, double measurem
     controller->uv = output - controller->u;
     controller->I += 0.5 * controller->Ki * controller->Ts * (error + controller->past_e) + 
         (double) (controller->Ki != 0.0) * 0.5 * controller->Ts / controller->Tt * (controller->uv + controller->past_uv);
+
+    /*controller->I += 0.5 * controller->Ki * controller->Ts * (error + controller->past_e);
+
+    if(controller->Ki != 0.0)
+        controller->I += 0.5 * controller->Ts / controller->Tt * (controller->uv + controller->past_uv);*/
+
     controller->D = (2.0 * controller->tau - controller->Ts) / (2.0 * controller->tau + controller->Ts) * controller->D - 
         (2.0 * controller->Kd) / (2.0 * controller->tau + controller->Ts) * (measurement - controller->past_y);
     controller->past_e = error;
@@ -170,6 +186,12 @@ void update_controller_state(PID* controller, double reference, double measureme
     controller->uv = control_action - controller->u;
     controller->I += 0.5 * controller->Ki * controller->Ts * (error + controller->past_e) + 
         (double) (controller->Ki != 0.0) * 0.5 * controller->Ts / controller->Tt * (controller->uv + controller->past_uv);
+
+    /*controller->I += 0.5 * controller->Ki * controller->Ts * (error + controller->past_e);
+
+    if(controller->Ki != 0.0)
+        controller->I += 0.5 * controller->Ts / controller->Tt * (controller->uv + controller->past_uv);*/
+
     controller->D = (2.0 * controller->tau - controller->Ts) / (2.0 * controller->tau + controller->Ts) * controller->D - 
         (2.0 * controller->Kd) / (2.0 * controller->tau + controller->Ts) * (measurement - controller->past_y);
     controller->past_e = error;
