@@ -15,4 +15,5 @@ echo "Build type: $build_type"
 cmake -DCMAKE_BUILD_TYPE=$build_type -S . -B build/
 cd build
 make
+cd tests
 ./test_lib --verbose

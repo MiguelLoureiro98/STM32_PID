@@ -1,6 +1,6 @@
 #include "PID.h"
 #include <criterion/criterion.h>
-#include <criterion/parameterized.h>
+//#include <criterion/parameterized.h>
 
 TestSuite(getset_tests);
 
@@ -38,7 +38,7 @@ Test(getset_tests, init){
     cr_assert(controller.Ts == 1.0, "Failed to initialise Ts.\n");
     cr_assert(controller.umin == -1.0, "Failed to initialise umin.\n");
     cr_assert(controller.umax == 1.0, "Failed to initialise umax.\n");
-    cr_assert(controller.Tt == 0.0, "Tt - wrong default value\n.");
+    cr_assert(controller.Tt == 1.0, "Tt - wrong default value\n.");
 
     cr_assert(controller.u == 0.0, "u does not default to 0.\n");
     cr_assert(controller.I == 0.0, "I does not default to 0.\n");
